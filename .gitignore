@@ -1,3 +1,5 @@
 .venv
 .env
 command-tracker.json
+*.pyc
+*.pt

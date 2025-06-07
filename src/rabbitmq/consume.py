@@ -3,6 +3,7 @@ from os import environ
 
 from analyze_video import analyze_video
 from config.rabbitmq import get_channel
+from gcs.generate_signed_url import generate_signed_url
 from gcs.read import get_video
 from gcs.write import upload_video
 
@@ -12,6 +13,7 @@ def callback(ch, method, properties, body):
     get_video(file_name=file_name)
     analyze_video()
     upload_video(file_name=file_name)
+    signed_url = generate_signed_url(file_name=file_name)
 
 def consume_message():
     channel = get_channel()

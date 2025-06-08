@@ -1,0 +1,7 @@
+.venv
+.env
+command-tracker.json
+*.pyc
+*.pt
+*.mp4
+*.avi

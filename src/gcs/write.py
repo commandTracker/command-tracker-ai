@@ -11,5 +11,3 @@ def upload_video(file_name, save_path):
     blob_name = os.path.join(f"results/{file_name}.avi")
     blob = bucket.blob(blob_name)
     blob.upload_from_filename(result_path)
-
-    return

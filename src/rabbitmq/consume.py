@@ -3,7 +3,7 @@ import os
 import tempfile
 
 from analyze_video import analyze_video
-from config.constants import ANALYZE_RESULT
+from config.constants import MESSAGES
 from config.rabbitmq import get_channel
 from gcs.generate_signed_url import generate_signed_url
 from gcs.read import get_video
@@ -25,7 +25,7 @@ def callback(ch, method, properties, body):
             signed_url = generate_signed_url(file_name=file_name)
             message = {
                 "email": email,
-                "message": ANALYZE_RESULT.SUCCESS,
+                "message": MESSAGES.SUCCESS.ANALYZE,
                 "url": signed_url
             }
         except Exception as err:
@@ -34,7 +34,6 @@ def callback(ch, method, properties, body):
                 "message": str(err),
                 "url": ""
             }
-
         publish_message(message=message)
 
         ch.basic_ack(delivery_tag=method.delivery_tag)

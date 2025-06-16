@@ -2,7 +2,7 @@ import ffmpeg
 import io
 from config.constants import MESSAGES
 
-def add_subtitle_to_video(video_bytes, subtitle_path):
+def insert_subtitle_to_video(video_bytes, subtitle_path):
     try:
         input_video = ffmpeg.input('pipe:0')
 
@@ -19,4 +19,4 @@ def add_subtitle_to_video(video_bytes, subtitle_path):
         return io.BytesIO(output)
 
     except:
-        raise RuntimeError(MESSAGES.ERROR.FAILED_ADD_SUBTITLE)
+        raise RuntimeError(MESSAGES.ERROR.FAILED_INSERT_SUBTITLE)

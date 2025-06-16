@@ -12,7 +12,7 @@ from labeling import label_frames
 from extract_frames import extract_frames
 from get_commands import get_commands
 from create_subtitle import make_stack_ass
-from add_subtitle import add_subtitle_to_video
+from insert_subtitle import insert_subtitle_to_video
 
 def callback(ch, method, properties, body):
     try:
@@ -39,7 +39,7 @@ def callback(ch, method, properties, body):
                     hit_down_frames=hit_down_frames
                 )
 
-            commands = get_commands(sit_punch_frames, uppercut_frames, hit_down_frames) 
+            commands = get_commands(sit_punch_frames, uppercut_frames, hit_down_frames)
         except:
             raise RuntimeError(MESSAGES.ERROR.FAILED_ANALYZE)
 
@@ -47,7 +47,7 @@ def callback(ch, method, properties, body):
 
         make_stack_ass(commands, ass_file_name)
 
-        output_video_stream = add_subtitle_to_video(data_bytes, ass_file_name)
+        output_video_stream = insert_subtitle_to_video(data_bytes, ass_file_name)
 
         os.remove(ass_file_name)
         upload_video(file_name=file_name, stream=output_video_stream)

@@ -13,9 +13,8 @@ def connect(retry=0):
         raise RuntimeError(MESSAGES.ERROR.FAILED_CONNECT_CHANNEL)
 
     try:
-        connection = pika.BlockingConnection(
-            pika.ConnectionParameters(environ["MQ_HOST"])
-        )
+        params = pika.URLParameters(environ["MQ_HOST"])
+        connection = pika.BlockingConnection(params)
         _channel = connection.channel()
 
         _channel.queue_declare(queue=environ["MQ_CONSUME_QUEUE"], durable=True)

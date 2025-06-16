@@ -1,42 +1,75 @@
 import json
 import os
-import tempfile
 
-from analyze_video import analyze_video
+from analyze_video import analyze_frame
 from config.constants import MESSAGES
 from config.rabbitmq import get_channel
 from gcs.generate_signed_url import generate_signed_url
 from gcs.read import get_video
 from gcs.write import upload_video
 from rabbitmq.publish import publish_message
+from labeling import label_frames
+from extract_frames import extract_frames
+from get_commands import get_commands
+from create_subtitle import make_stack_ass
+from insert_subtitle import insert_subtitle_to_video
 
 def callback(ch, method, properties, body):
-    email, file_name, selected_character = json.loads(body).values()
+    try:
+        email, file_name, selected_character = json.loads(body).values()
+        edited_blob_name = f"edited/{file_name}"
 
-    with tempfile.TemporaryDirectory(dir="temp") as temp_dir:
+        stream = get_video(blob_name=edited_blob_name)
+        data_bytes = stream.read()
+        stream.close()
+
+        sit_punch_frames = []
+        uppercut_frames = []
+        hit_down_frames = []
+
         try:
-            get_video(file_name=file_name, save_dir=temp_dir)
-            analyze_video(file_name=file_name, save_dir=temp_dir)
+            for i, frame in enumerate(extract_frames(data_bytes)):
+                pose_data = analyze_frame(frame, side=selected_character)
 
-            save_path = os.path.join(temp_dir, "result")
+                label_frames(
+                    pose_data=pose_data,
+                    frame_id=i,
+                    sit_punch_frames=sit_punch_frames,
+                    uppercut_frames=uppercut_frames,
+                    hit_down_frames=hit_down_frames
+                )
 
-            upload_video(file_name=file_name, save_path=save_path)
+            commands = get_commands(sit_punch_frames, uppercut_frames, hit_down_frames)
+        except:
+            raise RuntimeError(MESSAGES.ERROR.FAILED_ANALYZE)
 
-            signed_url = generate_signed_url(file_name=file_name)
-            message = {
-                "email": email,
-                "message": MESSAGES.SUCCESS.ANALYZE,
-                "url": signed_url
-            }
-        except Exception as err:
-            message = {
-                "email": email,
-                "message": str(err),
-                "url": ""
-            }
-        publish_message(message=message)
+        ass_file_name = f"{file_name}.ass"
 
-        ch.basic_ack(delivery_tag=method.delivery_tag)
+        make_stack_ass(commands, ass_file_name)
+
+        output_video_stream = insert_subtitle_to_video(data_bytes, ass_file_name)
+
+        os.remove(ass_file_name)
+        upload_video(file_name=file_name, stream=output_video_stream)
+
+        signed_url = generate_signed_url(file_name=file_name)
+        message = {
+            "email": email,
+            "message": MESSAGES.SUCCESS.ANALYZE,
+            "url": signed_url
+        }
+    except Exception as err:
+        message = {
+            "email": email,
+            "message": str(err),
+            "url": ""
+        }
+
+        ch.basic_nack(delivery_tag=method.delivery_tag, requeue=True)
+
+    publish_message(message=message)
+
+    ch.basic_ack(delivery_tag=method.delivery_tag)
 
 def consume_message():
     channel = get_channel()

@@ -9,7 +9,7 @@ class MESSAGES:
         FAILED_ANALYZE = "영상 분석에 실패했습니다."
         FAILED_UPLOAD = "영상 저장에 실패했습니다."
         FAILED_GENERATE_URL = "액세스 링크 생성에 실패했습니다."
-
+        FAILED_INSERT_SUBTITLE = "영상에 자막을 삽입하는 데 실패했습니다."
+        FAILED_CREATE_SUBTITLE = "자막 파일 생성에 실패했습니다."
         FAILED_CONNECT_CHANNEL = "채널 연결에 실패했습니다."
-
         SERVER_ERROR = "서버 오류가 발생했습니다."

@@ -4,7 +4,7 @@ import os
 
 def get_bucket():
     creds_path = os.path.join(
-        os.path.dirname(os.getcwd()),
+        os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')),
         os.environ["KEY_FILE_NAME"]
     )
     credentials = service_account.Credentials.from_service_account_file(creds_path)

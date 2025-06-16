@@ -11,9 +11,7 @@ def add_subtitle_to_video(video_bytes, subtitle_path):
             .filter('subtitles', subtitle_path)
             .output('pipe:1',
                     vcodec='libvpx-vp9',
-                    acodec='libvorbis',
-                    format='webm',
-                    movflags='faststart')
+                    format='webm')
             .run(input=video_bytes, capture_stdout=True)
         )
 

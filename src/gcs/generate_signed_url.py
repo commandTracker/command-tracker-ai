@@ -7,7 +7,7 @@ from config.gcs import get_bucket
 def generate_signed_url(file_name):
     try:
         bucket = get_bucket()
-        blob_name = join(f"results/{file_name}.avi")
+        blob_name = join(f"results/{file_name}")
         blob = bucket.blob(blob_name)
 
         url = blob.generate_signed_url(

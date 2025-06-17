@@ -2,7 +2,6 @@ from mmdet.apis import init_detector, inference_detector
 from mmpose.apis import init_model, inference_topdown
 from mmengine.registry import init_default_scope
 from mmpose.utils.typing import ConfigDict
-from config.constants import MESSAGES
 
 init_default_scope("mmdet")
 init_default_scope("mmpose")

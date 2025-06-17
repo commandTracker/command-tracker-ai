@@ -16,3 +16,9 @@ class MESSAGES:
         FAILED_CREATE_SUBTITLE = "자막 파일 생성에 실패했습니다."
         FAILED_CONNECT_CHANNEL = "채널 연결에 실패했습니다."
         SERVER_ERROR = "서버 오류가 발생했습니다."
+
+class CODE:
+    class SUCCESSS:
+        ANALYZE = "SUCCESS_ANALYZE"
+    class FAILED:
+        ANALYZE = "FAILED_ANALYZE"

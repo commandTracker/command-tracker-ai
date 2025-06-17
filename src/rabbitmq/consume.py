@@ -2,7 +2,7 @@ import json
 import os
 
 from analyze_video import analyze_frame
-from config.constants import MESSAGES
+from config.constants import MESSAGES, CODE
 from gcs.generate_signed_url import generate_signed_url
 from gcs.read import get_video
 from gcs.write import upload_video
@@ -48,6 +48,7 @@ def process_message(body):
         signed_url = generate_signed_url(file_name=file_name)
         message = {
             "email": email,
+            "code": CODE.SUCCESSS.ANALYZE,
             "message": MESSAGES.SUCCESS.ANALYZE,
             "url": signed_url
         }
@@ -57,8 +58,9 @@ def process_message(body):
     except Exception as err:
         message = {
             "email": email,
+            "code": CODE.FAILED.ANALYZE,
             "message": str(err),
-            "url": ""
+            "url": None
         }
 
     return message

@@ -3,7 +3,6 @@ import os
 
 from analyze_video import analyze_frame
 from config.constants import MESSAGES
-from config.rabbitmq import get_channel
 from gcs.generate_signed_url import generate_signed_url
 from gcs.read import get_video
 from gcs.write import upload_video
@@ -14,7 +13,7 @@ from get_commands import get_commands
 from create_subtitle import make_stack_ass
 from insert_subtitle import insert_subtitle_to_video
 
-def callback(ch, method, properties, body):
+def process_message(body):
     try:
         email, file_name, selected_character = json.loads(body).values()
         edited_blob_name = f"edited/{file_name}"
@@ -31,13 +30,7 @@ def callback(ch, method, properties, body):
             for i, frame in enumerate(extract_frames(data_bytes)):
                 pose_data = analyze_frame(frame, side=selected_character)
 
-                label_frames(
-                    pose_data=pose_data,
-                    frame_id=i,
-                    sit_punch_frames=sit_punch_frames,
-                    uppercut_frames=uppercut_frames,
-                    hit_down_frames=hit_down_frames
-                )
+                label_frames(pose_data, i, sit_punch_frames, uppercut_frames, hit_down_frames)
 
             commands = get_commands(sit_punch_frames, uppercut_frames, hit_down_frames)
         except:
@@ -58,6 +51,9 @@ def callback(ch, method, properties, body):
             "message": MESSAGES.SUCCESS.ANALYZE,
             "url": signed_url
         }
+
+        return message
+
     except Exception as err:
         message = {
             "email": email,
@@ -65,15 +61,15 @@ def callback(ch, method, properties, body):
             "url": ""
         }
 
-        ch.basic_nack(delivery_tag=method.delivery_tag, requeue=True)
+    return message
 
-    publish_message(message=message)
+def callback(ch, method, properties, body):
+    message = process_message(body)
+    publish_message(message)
 
     ch.basic_ack(delivery_tag=method.delivery_tag)
 
-def consume_message():
-    channel = get_channel()
-
+def consume_message(channel):
     channel.basic_consume(
         queue=os.environ["MQ_CONSUME_QUEUE"],
         auto_ack=False,

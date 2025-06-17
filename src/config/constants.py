@@ -1,6 +1,9 @@
 class GCS:
     SIGNED_URL_EXPIRE = 60 * 24
 
+class RABBITMQ:
+    HEART_BEAT = 60
+
 class MESSAGES:
     class SUCCESS:
         ANALYZE = "영상 분석을 완료했습니다."
